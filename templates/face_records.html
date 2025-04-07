@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Records</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            background: #1E293B;
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            border-bottom: 1px solid #334155;
+        }
+        
+        .sidebar-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.25rem;
+        }
+        
+        .nav-menu {
+            margin-top: 1.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            color: #E2E8F0;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .main-content {
+            padding: 2rem;
+            background: #F8FAFC;
+        }
+        
+        .content-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .content-header h1 {
+            font-size: 1.75rem;
+            color: #1E293B;
+            margin-bottom: 1rem;
+        }
+        
+        .search-container {
+            display: flex;
+            margin-bottom: 1.5rem;
+            max-width: 500px;
+        }
+        
+        .search-container input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.5rem 0 0 0.5rem;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .search-container button {
+            padding: 0 1.5rem;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 0 0.5rem 0.5rem 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .records-table th, .records-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #E2E8F0;
+        }
+        
+        .records-table th {
+            background: #F1F5F9;
+            font-weight: 600;
+            color: #1E293B;
+        }
+        
+        .records-table tr:hover {
+            background: #F8FAFC;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .no-photo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #F1F5F9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94A3B8;
+        }
+        
+        .action-btn {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            margin-right: 0.5rem;
+            width: 35px;
+            height: 35px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .edit-btn {
+            background: #3B82F6;
+            color: white;
+        }
+        
+        .delete-btn {
+            background: #EF4444;
+            color: white;
+        }
+        
+        /* Search Result Styles */
+        .search-result {
+            display: none;
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-result-image {
+            width: 300px;
+            height: 300px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            margin-bottom: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+        
+        .search-result-details {
+            margin-bottom: 2rem;
+        }
+        
+        .search-result-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 0.5rem;
+        }
+        
+        .search-result-roll {
+            font-size: 1.1rem;
+            color: #64748B;
+        }
+        
+        .search-result-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #4F46E5;
+            color: white;
+            border: none;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #4F46E5;
+            color: #4F46E5;
+        }
+        
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+            border: none;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-20px);
+            transition: all 0.3s;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #1E293B;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #E2E8F0;
+            border-radius: 0.375rem;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #94A3B8;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .search-result-image {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .search-result-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-user-shield"></i> Admin Panel</h2>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-item">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="{{ url_for('face_records') }}" class="nav-item active">
+                    <i class="fas fa-user-friends"></i> Face Records
+                </a>
+                <a href="{{ url_for('object_settings') }}" class="nav-item">
+                    <i class="fas fa-object-group"></i> Object Settings
+                </a>
+                <a href="{{ url_for('admin_logout') }}" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1>Face Records Management</h1>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search by name or roll number...">
+                    <button onclick="searchRecords()">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Records Table (default view) -->
+            <div id="recordsTable">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Roll No</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for face in faces %}
+                        <tr>
+                            <td>
+                                {% if face[2] %}
+                                <img src="{{ url_for('static', filename='recognized_faces/' + face[2]) }}" class="user-avatar">
+                                {% else %}
+                                <div class="no-photo">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>{{ face[0] }}</td>
+                            <td>{{ face[1] }}</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="showEditModal('{{ face[1] }}', '{{ face[0] }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" onclick="confirmDelete('{{ face[1] }}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 1.5rem;">
+                    <button class="btn btn-primary" onclick="window.location.href='{{ url_for('face_detection') }}?admin=true'">
+                        <i class="fas fa-plus"></i> Add New Record
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Result (hidden by default) -->
+            <div id="searchResult" class="search-result">
+                <img id="resultImage" class="search-result-image" src="" alt="Face Image">
+                <div class="search-result-details">
+                    <div id="resultName" class="search-result-name"></div>
+                    <div id="resultRoll" class="search-result-roll"></div>
+                </div>
+                <div class="search-result-actions">
+                    <button class="btn btn-primary" id="editResultBtn">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-danger" id="deleteResultBtn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-outline" onclick="backToTable()">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Record</h3>
+                <button class="close-btn" onclick="closeModal('editModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <div class="form-group">
+                        <label for="editName">Name</label>
+                        <input type="text" id="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRollNo">Roll Number</label>
+                        <input type="text" id="editRollNo" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Current Photo</label>
+                        <img id="currentPhoto" class="search-result-image" style="width: 200px; height: 200px; margin: 0 auto 1rem;">
+                    </div>
+                    <div class="form-group">
+                        <label for="editPhoto">Update Photo (optional)</label>
+                        <input type="file" id="editPhoto" accept="image/*">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('editModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="updateRecord()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Delete</h3>
+                <button class="close-btn" onclick="closeModal('deleteModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this record? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('deleteModal')">Cancel</button>
+                <button class="btn btn-danger" onclick="deleteRecord()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let currentRecord = null;
+        
+        // Search functionality
+        function searchRecords() {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (!searchTerm) return;
+            
+            fetch(`/admin/search-face?q=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.record) {
+                        // Show search result
+                        document.getElementById('recordsTable').style.display = 'none';
+                        document.getElementById('searchResult').style.display = 'block';
+                        
+                        // Populate result data
+                        const record = data.record;
+                        currentRecord = record.roll_no;
+                        
+                        document.getElementById('resultName').textContent = record.name;
+                        document.getElementById('resultRoll').textContent = `Roll No: ${record.roll_no}`;
+                        
+                        const imageUrl = record.image_path 
+                            ? `/static/recognized_faces/${record.image_path}`
+                            : 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk0QTNCOCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMCAyMXYtMmE0IDQgMCAwIDAtNC00SDhhNCA0IDAgMDAtNCA0djIiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjciIHI9IjQiPjwvY2lyY2xlPjwvc3ZnPg==';
+                        
+                        document.getElementById('resultImage').src = imageUrl;
+                        document.getElementById('editResultBtn').onclick = () => showEditModal(record.roll_no, record.name);
+                        document.getElementById('deleteResultBtn').onclick = () => confirmDelete(record.roll_no);
+                    } else {
+                        alert(data.message || 'No matching record found');
+                    }
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                    alert('Error searching for record');
+                });
+        }
+        
+        function backToTable() {
+            document.getElementById('recordsTable').style.display = 'block';
+            document.getElementById('searchResult').style.display = 'none';
+            document.getElementById('searchInput').value = '';
+            currentRecord = null;
+        }
+        
+        // Modal functions
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+            document.body.style.overflow = '';
+        }
+        
+        function showEditModal(rollNo, name) {
+            currentRecord = rollNo;
+            document.getElementById('editName').value = name;
+            document.getElementById('editRollNo').value = rollNo;
+            
+            // Set current photo
+            const imgSrc = document.getElementById('resultImage').src || 
+                         Array.from(document.querySelectorAll('tbody tr')).find(tr => {
+                             return tr.querySelector('td:nth-child(3)').textContent === rollNo;
+                         })?.querySelector('td:first-child img')?.src;
+            
+            if (imgSrc) {
+                document.getElementById('currentPhoto').src = imgSrc;
+            } else {
+                document.getElementById('currentPhoto').src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzk0QTNCOCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwYXRoIGQ9Ik0yMCAyMXYtMmE0IDQgMCAwIDAtNC00SDhhNCA0IDAgMDAtNCA0djIiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjciIHI9IjQiPjwvY2lyY2xlPjwvc3ZnPg==';
+            }
+            
+            showModal('editModal');
+        }
+        
+        function confirmDelete(rollNo) {
+            currentRecord = rollNo;
+            showModal('deleteModal');
+        }
+        
+        // CRUD operations
+        function updateRecord() {
+            const name = document.getElementById('editName').value.trim();
+            const rollNo = document.getElementById('editRollNo').value.trim();
+            const photo = document.getElementById('editPhoto').files[0];
+            
+            if (!name || !rollNo) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('roll_no', rollNo);
+            if (photo) {
+                formData.append('photo', photo);
+            }
+            
+            fetch(`/admin/update-face/${rollNo}`, {
+                method: 'PUT',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    return response.json().then(err => {
+                        throw new Error(err.message || 'Failed to update record');
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
+        }
+        
+        function deleteRecord() {
+            if (!currentRecord) return;
+            
+            fetch(`/admin/delete-face/${currentRecord}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Failed to delete record');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting the record');
+            });
+        }
+        
+        // Handle Enter key in search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchRecords();
+            }
+        });
+    </script>
+</body>
+</html>

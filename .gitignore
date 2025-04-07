@@ -1,0 +1,5 @@
+__pycache__/
+*.db
+*.pt
+.env
+recognized_faces/

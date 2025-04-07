@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Real-time Object Detection</h1>
+            <p class="subtitle">Advanced object recognition using YOLO deep learning</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="camera-container">
+                <div class="video-wrapper">
+                    <img src="{{ url_for('video_feed_object') }}" alt="Video Feed" id="video-feed">
+                </div>
+                <div class="detection-info">
+                    <div class="object-count">
+                        <span id="total-count">0</span> objects detected
+                    </div>
+                    <div class="object-list" id="objects-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <a href="{{ url_for('index') }}" class="btn btn-outline">Back to Home</a>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/object_detection.js') }}"></script>
+</body>
+</html>
